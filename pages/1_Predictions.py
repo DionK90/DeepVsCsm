@@ -11,7 +11,6 @@ import bidict
 import py_params
 import py_hmd_data
 from py_hmd_data import HmdMortalityData, HmdResidual, HmdError
-import py_utils_model
 import py_utils_general
 import pickle
 
