@@ -11,9 +11,6 @@ from typing import Type
 from typing import Callable
 import warnings
 
-from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.api import VAR
-
 import py_params
 
 TYPE_DATA_DEATH = 'death'
