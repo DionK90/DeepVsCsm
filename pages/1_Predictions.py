@@ -100,33 +100,33 @@ def load_pred_csm(folder):
 
     # Extract the prediction dataframe for the LC_SVD models
     df_pred_lc_svd_0_99 = hmd_pred_lc_svd_0_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_lc_svd_0_99, csm_model_names[0])
+    adjust_age_sex_cause(df_pred_lc_svd_0_99, csm_model_names[0])
     df_pred_lc_svd_0_85 = hmd_pred_lc_svd_0_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_lc_svd_0_85, csm_model_names[1])
+    adjust_age_sex_cause(df_pred_lc_svd_0_85, csm_model_names[1])
     df_pred_lc_svd_20_99 = hmd_pred_lc_svd_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_lc_svd_20_99, csm_model_names[2])
+    adjust_age_sex_cause(df_pred_lc_svd_20_99, csm_model_names[2])
     df_pred_lc_svd_20_85 = hmd_pred_lc_svd_20_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_lc_svd_20_85, csm_model_names[3])
+    adjust_age_sex_cause(df_pred_lc_svd_20_85, csm_model_names[3])
 
     # Extract the prediction dataframe for the APC models
     df_pred_apc_0_99 = hmd_pred_apc_0_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_apc_0_99, csm_model_names[4])
+    adjust_age_sex_cause(df_pred_apc_0_99, csm_model_names[4])
     df_pred_apc_0_85 = hmd_pred_apc_0_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_apc_0_85, csm_model_names[5])
+    adjust_age_sex_cause(df_pred_apc_0_85, csm_model_names[5])
     df_pred_apc_20_99 = hmd_pred_apc_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_apc_20_99, csm_model_names[6])
+    adjust_age_sex_cause(df_pred_apc_20_99, csm_model_names[6])
     df_pred_apc_20_85 = hmd_pred_apc_20_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_apc_20_85, csm_model_names[7])
+    adjust_age_sex_cause(df_pred_apc_20_85, csm_model_names[7])
 
     # Extract the prediction dataframe for the RH models
     df_pred_rh_0_99 = hmd_pred_rh_0_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_rh_0_99, csm_model_names[8], is_cause_zero=False, is_sex_zero=False)
+    adjust_age_sex_cause(df_pred_rh_0_99, csm_model_names[8], is_cause_zero=False, is_sex_zero=False)
     df_pred_rh_0_85 = hmd_pred_rh_0_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_rh_0_85, csm_model_names[9], is_cause_zero=False, is_sex_zero=False)
+    adjust_age_sex_cause(df_pred_rh_0_85, csm_model_names[9], is_cause_zero=False, is_sex_zero=False)
     df_pred_rh_20_99 = hmd_pred_rh_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_rh_20_99, csm_model_names[10], is_cause_zero=False, is_sex_zero=False)
+    adjust_age_sex_cause(df_pred_rh_20_99, csm_model_names[10], is_cause_zero=False, is_sex_zero=False)
     df_pred_rh_20_85 = hmd_pred_rh_20_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    py_utils_model.adjust_age_sex_cause(df_pred_rh_20_85, csm_model_names[11], is_cause_zero=False, is_sex_zero=False)
+    adjust_age_sex_cause(df_pred_rh_20_85, csm_model_names[11], is_cause_zero=False, is_sex_zero=False)
     
     dict_csm = {key:value for key, value in zip(csm_model_names, 
                                                 [df_pred_lc_svd_0_99, df_pred_lc_svd_0_85, df_pred_lc_svd_20_99, df_pred_lc_svd_20_85,
@@ -151,14 +151,41 @@ def load_pred_deep(folder):
 
     deep_model_names = ['deep6_1_mxt_256_00_99', 'deep6_1_lmxt_256_00_99', 'deep6_17_lmxt_4096_00_99']
 
-    py_utils_model.adjust_age_sex_cause(df_deep_1_0_99, deep_model_names[0], is_age_str=False)
-    py_utils_model.adjust_age_sex_cause(df_deep_2_0_99, deep_model_names[1], is_age_str=False)
-    py_utils_model.adjust_age_sex_cause(df_deep_3_0_99, deep_model_names[2], is_age_str=False)
+    adjust_age_sex_cause(df_deep_1_0_99, deep_model_names[0], is_age_str=False)
+    adjust_age_sex_cause(df_deep_2_0_99, deep_model_names[1], is_age_str=False)
+    adjust_age_sex_cause(df_deep_3_0_99, deep_model_names[2], is_age_str=False)
     
     dict_deep = {key:value for key, value in zip(deep_model_names, [df_deep_1_0_99, df_deep_2_0_99, df_deep_3_0_99])}
 
     return dict_deep, deep_model_names
 
+
+##########################################
+### Functions to Adjust Mortality Data ###
+##########################################
+
+def adjust_age_sex_cause(df:pd.DataFrame,
+                         model_name:str,
+                         age_start:int = 0,                         
+                         is_age_str:bool = True,
+                         is_sex_zero:bool = True,
+                         is_cause_zero:bool = True):
+    """
+    Adjust a mortality dataframe (inplace) as follows:
+    1. convert age from string (mXX or eXX) to integer, then adjust the index from zero-based to the real age range
+    2. convert sex and cause from zero-based index to one-based index (where 0 means all or total)
+    3. add column `type` with value `model_name`
+    """
+    if(is_age_str):
+        df.age = df.age.str[1:].astype(int)
+    df.age = df.age + age_start
+    if((model_name is not None) and (model_name.strip() != "")):
+        df['type'] = model_name
+    if(is_sex_zero):
+        df['sex'] = df['sex'] + 1
+    if(is_cause_zero):
+        df['cause'] = df['cause'] + 1
+        
 ##########################
 ### Parameter for data ###
 ##########################
