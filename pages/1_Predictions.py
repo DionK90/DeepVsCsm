@@ -15,6 +15,33 @@ import py_utils_general
 import pickle
 
 
+##########################################
+### Functions to Adjust Mortality Data ###
+##########################################
+
+def adjust_age_sex_cause(df:pd.DataFrame,
+                         model_name:str,
+                         age_start:int = 0,                         
+                         is_age_str:bool = True,
+                         is_sex_zero:bool = True,
+                         is_cause_zero:bool = True):
+    """
+    Adjust a mortality dataframe (inplace) as follows:
+    1. convert age from string (mXX or eXX) to integer, then adjust the index from zero-based to the real age range
+    2. convert sex and cause from zero-based index to one-based index (where 0 means all or total)
+    3. add column `type` with value `model_name`
+    """
+    if(is_age_str):
+        df.age = df.age.str[1:].astype(int)
+    df.age = df.age + age_start
+    if((model_name is not None) and (model_name.strip() != "")):
+        df['type'] = model_name
+    if(is_sex_zero):
+        df['sex'] = df['sex'] + 1
+    if(is_cause_zero):
+        df['cause'] = df['cause'] + 1
+        
+
 #########################################
 ### Function to Load Data and Results ###
 #########################################
@@ -160,32 +187,6 @@ def load_pred_deep(folder):
     return dict_deep, deep_model_names
 
 
-##########################################
-### Functions to Adjust Mortality Data ###
-##########################################
-
-def adjust_age_sex_cause(df:pd.DataFrame,
-                         model_name:str,
-                         age_start:int = 0,                         
-                         is_age_str:bool = True,
-                         is_sex_zero:bool = True,
-                         is_cause_zero:bool = True):
-    """
-    Adjust a mortality dataframe (inplace) as follows:
-    1. convert age from string (mXX or eXX) to integer, then adjust the index from zero-based to the real age range
-    2. convert sex and cause from zero-based index to one-based index (where 0 means all or total)
-    3. add column `type` with value `model_name`
-    """
-    if(is_age_str):
-        df.age = df.age.str[1:].astype(int)
-    df.age = df.age + age_start
-    if((model_name is not None) and (model_name.strip() != "")):
-        df['type'] = model_name
-    if(is_sex_zero):
-        df['sex'] = df['sex'] + 1
-    if(is_cause_zero):
-        df['cause'] = df['cause'] + 1
-        
 ##########################
 ### Parameter for data ###
 ##########################
