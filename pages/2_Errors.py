@@ -8,14 +8,38 @@ import matplotlib.pyplot as plt
 import bidict
 
 import py_params
-from py_model_st import *
 import py_hmd_data
 from py_hmd_data import HmdMortalityData, HmdResidual, HmdError
-import py_utils_model
 
 import pickle
 
 
+##########################################
+### Functions to Adjust Mortality Data ###
+##########################################
+
+def adjust_age_sex_cause(df:pd.DataFrame,
+                         model_name:str,
+                         age_start:int = 0,                         
+                         is_age_str:bool = True,
+                         is_sex_zero:bool = True,
+                         is_cause_zero:bool = True):
+    """
+    Adjust a mortality dataframe (inplace) as follows:
+    1. convert age from string (mXX or eXX) to integer, then adjust the index from zero-based to the real age range
+    2. convert sex and cause from zero-based index to one-based index (where 0 means all or total)
+    3. add column `type` with value `model_name`
+    """
+    if(is_age_str):
+        df.age = df.age.str[1:].astype(int)
+    df.age = df.age + age_start
+    if((model_name is not None) and (model_name.strip() != "")):
+        df['type'] = model_name
+    if(is_sex_zero):
+        df['sex'] = df['sex'] + 1
+    if(is_cause_zero):
+        df['cause'] = df['cause'] + 1
+        
 #########################################
 ### Function to Load Data and Results ###
 #########################################
@@ -72,68 +96,68 @@ def load_res_csm(folder):
     # Load the LC residuals for various age range 
     with open(f"{folder}res_lc_svd_0_99.pickle", "rb") as outfile:
         res_lc_svd_0_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_0_99.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_0_99.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_0_99.df_pred, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_0_99.df_true, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_0_99.df_res, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_0_99.df_pred, model_name=None)
     with open(f"{folder}res_lc_svd_20_99.pickle", "rb") as outfile:
         res_lc_svd_20_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_20_99.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_20_99.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_20_99.df_pred, model_name=None)    
+        adjust_age_sex_cause(res_lc_svd_20_99.df_true, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_20_99.df_res, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_20_99.df_pred, model_name=None)    
     with open(f"{folder}res_lc_svd_0_85.pickle", "rb") as outfile:
         res_lc_svd_0_85 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_0_85.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_0_85.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_0_85.df_pred, model_name=None)    
+        adjust_age_sex_cause(res_lc_svd_0_85.df_true, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_0_85.df_res, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_0_85.df_pred, model_name=None)    
     with open(f"{folder}res_lc_svd_20_85.pickle", "rb") as outfile:
         res_lc_svd_20_85 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_20_85.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_20_85.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_lc_svd_20_85.df_pred, model_name=None)    
+        adjust_age_sex_cause(res_lc_svd_20_85.df_true, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_20_85.df_res, model_name=None)
+        adjust_age_sex_cause(res_lc_svd_20_85.df_pred, model_name=None)    
 
     # Load the RH residuals for various age range
     with open(f"{folder}res_rh_0_99.pickle", "rb") as outfile:
         res_rh_0_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_rh_0_99.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_0_99.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_0_99.df_pred, model_name=None)    
+        adjust_age_sex_cause(res_rh_0_99.df_true, model_name=None)
+        adjust_age_sex_cause(res_rh_0_99.df_res, model_name=None)
+        adjust_age_sex_cause(res_rh_0_99.df_pred, model_name=None)    
     with open(f"{folder}res_rh_20_99.pickle", "rb") as outfile:
         res_rh_20_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_rh_20_99.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_20_99.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_20_99.df_pred, model_name=None)
+        adjust_age_sex_cause(res_rh_20_99.df_true, model_name=None)
+        adjust_age_sex_cause(res_rh_20_99.df_res, model_name=None)
+        adjust_age_sex_cause(res_rh_20_99.df_pred, model_name=None)
     with open(f"{folder}res_rh_0_85.pickle", "rb") as outfile:
         res_rh_0_85 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_rh_0_85.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_0_85.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_0_85.df_pred, model_name=None)
+        adjust_age_sex_cause(res_rh_0_85.df_true, model_name=None)
+        adjust_age_sex_cause(res_rh_0_85.df_res, model_name=None)
+        adjust_age_sex_cause(res_rh_0_85.df_pred, model_name=None)
     with open(f"{folder}res_rh_20_85.pickle", "rb") as outfile:
         res_rh_20_85 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_rh_20_85.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_20_85.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_rh_20_85.df_pred, model_name=None)
+        adjust_age_sex_cause(res_rh_20_85.df_true, model_name=None)
+        adjust_age_sex_cause(res_rh_20_85.df_res, model_name=None)
+        adjust_age_sex_cause(res_rh_20_85.df_pred, model_name=None)
 
     # Load the APC residuals for various age range
     with open(f"{folder}res_apc_0_99.pickle", "rb") as outfile:
         res_apc_0_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_apc_0_99.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_0_99.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_0_99.df_pred, model_name=None)
+        adjust_age_sex_cause(res_apc_0_99.df_true, model_name=None)
+        adjust_age_sex_cause(res_apc_0_99.df_res, model_name=None)
+        adjust_age_sex_cause(res_apc_0_99.df_pred, model_name=None)
     with open(f"{folder}res_apc_20_99.pickle", "rb") as outfile:
         res_apc_20_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_apc_20_99.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_20_99.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_20_99.df_pred, model_name=None)
+        adjust_age_sex_cause(res_apc_20_99.df_true, model_name=None)
+        adjust_age_sex_cause(res_apc_20_99.df_res, model_name=None)
+        adjust_age_sex_cause(res_apc_20_99.df_pred, model_name=None)
     with open(f"{folder}res_apc_0_85.pickle", "rb") as outfile:
         res_apc_0_85 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_apc_0_85.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_0_85.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_0_85.df_pred, model_name=None)
+        adjust_age_sex_cause(res_apc_0_85.df_true, model_name=None)
+        adjust_age_sex_cause(res_apc_0_85.df_res, model_name=None)
+        adjust_age_sex_cause(res_apc_0_85.df_pred, model_name=None)
     with open(f"{folder}res_apc_20_85.pickle", "rb") as outfile:
         res_apc_20_85 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_apc_20_85.df_true, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_20_85.df_res, model_name=None)
-        py_utils_model.adjust_age_sex_cause(res_apc_20_85.df_pred, model_name=None)
+        adjust_age_sex_cause(res_apc_20_85.df_true, model_name=None)
+        adjust_age_sex_cause(res_apc_20_85.df_res, model_name=None)
+        adjust_age_sex_cause(res_apc_20_85.df_pred, model_name=None)
 
     dict_csm = {key:value for key, value in zip(csm_model_names, 
                                                 [res_lc_svd_0_99, res_lc_svd_0_85, res_lc_svd_20_99, res_lc_svd_20_85,
@@ -146,23 +170,23 @@ def load_res_deep(folder):
     # Load the first best deep model for various age ranges
     with open(f"{folder}res_deep6_hmd_cod_1_lmxt_scaled_sig_256.pickle", "rb") as outfile:
         res_deep_1_0_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_deep_1_0_99.df_res, model_name=None, is_age_str=False)
-        py_utils_model.adjust_age_sex_cause(res_deep_1_0_99.df_true, model_name=None, is_age_str=False)
-        py_utils_model.adjust_age_sex_cause(res_deep_1_0_99.df_pred, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_1_0_99.df_res, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_1_0_99.df_true, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_1_0_99.df_pred, model_name=None, is_age_str=False)
 
     # Load the second best deep model for various age ranges
     with open(f"{folder}res_deep6_hmd_cod_2_lmxt_scaled_sig_256_1.pickle", "rb") as outfile:
         res_deep_2_0_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_deep_2_0_99.df_res, model_name=None, is_age_str=False)
-        py_utils_model.adjust_age_sex_cause(res_deep_2_0_99.df_true, model_name=None, is_age_str=False)
-        py_utils_model.adjust_age_sex_cause(res_deep_2_0_99.df_pred, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_2_0_99.df_res, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_2_0_99.df_true, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_2_0_99.df_pred, model_name=None, is_age_str=False)
 
     # Load the third best deep model for various age ranges
     with open(f"{folder}res_deep6_hmd_cod_17_lmxt_scaled_sig_4096.pickle", "rb") as outfile:
         res_deep_3_0_99 = pickle.load(outfile)
-        py_utils_model.adjust_age_sex_cause(res_deep_3_0_99.df_res, model_name=None, is_age_str=False)
-        py_utils_model.adjust_age_sex_cause(res_deep_3_0_99.df_true, model_name=None, is_age_str=False)
-        py_utils_model.adjust_age_sex_cause(res_deep_3_0_99.df_pred, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_3_0_99.df_res, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_3_0_99.df_true, model_name=None, is_age_str=False)
+        adjust_age_sex_cause(res_deep_3_0_99.df_pred, model_name=None, is_age_str=False)
 
         
     deep_model_names = ['deep6_1_mxt_256_00_99', 'deep6_1_lmxt_256_00_99', 'deep6_17_lmxt_4096_00_99']    
