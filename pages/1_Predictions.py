@@ -265,11 +265,13 @@ age = st.sidebar.slider("Select age", min_value=0, max_value=99, value=20)
 ### Age vs Log-Mortality ###
 ############################
 
+st.header("Plot Age vs Log-Rate", divider=True)
+
 # Validate selection
 if len(models) > 6:
     st.error(f"⚠️ You can only select up to 6 options.")
 else:    
-    # Plot combined age vs log_mortality (all sexes and causes)
+    # Plot combined age vs log_mortality (all sexes and causes)    
     df_all = df_all.loc[df_all.type.isin(models + [py_params.TYPE_TRUE])]
     fig, _ = py_utils_general.plot_age_mortality_model(df_all,
                                             row_feature_name='sex', row_feature_values=[1,2], 
@@ -284,20 +286,22 @@ else:
                                             is_fig_saved=False,
                                             ages=list(df_all['age'].unique()), y_limit=[y_min, y_max],
                                             col_palette=sns.color_palette("tab10", len(df_all.type.unique())))
+    st.subheader("Age vs Log-Rate All Sexes and Causes")
     st.pyplot(fig)
 
         
-    # Plot combined age vs log_mortality (1 sex and 1 cause)
+    # Plot combined age vs log_mortality (1 sex and 1 cause)    
     matplotlib.rcParams.update(matplotlib.rcParamsDefault)
     fig, ax = plt.subplots()
     fig.suptitle(f'Age vs Log-Rate {sex}-{cause} for various models')
     sns.lineplot(data=df_all.loc[(df_all.sex == sex_code) & (df_all.cause==cause_code) & (df_all.year == year)], 
                  x='age', y='log_mortality', style='type', hue='type')
+    st.subheader(f"Age vs Log-Rate for {sex} and {cause}")
     st.pyplot(fig)
 
     # Plot focused age vs log_mortality
     # df_pred_focus = dict_pred[model]
-    # df_pred_focus['log_mortality'] = np.log(df_pred_focus['mortality'])
+    # df_pred_focus['log_mortality'] = np.log(df_pred_focus['mortality'])    
     df_pred_focus = df_all.loc[df_all.type == model]    
     df_m_long['log_mortality'] = np.log(df_m_long['mortality'])
     matplotlib.rcParams.update(matplotlib.rcParamsDefault)
@@ -309,11 +313,13 @@ else:
                        x='age', y='log_mortality', hue='year', ax=ax[0], palette="viridis")
     sns.lineplot(data=df_m_long.loc[(df_m_long.sex == sex_code) & (df_m_long.cause==cause_code)], 
                        x='age', y='log_mortality', hue='year', ax=ax[1], palette="viridis")
+    st.subheader(f"Age vs Log-Rate for {sex} and {cause} and {model} model only")
     st.pyplot(fig)
 
 ### Year vs Log-Mortality ###
 #############################
 # Validate selection
+st.header("Plot Year vs Log-Rate", divider=True)
 if len(models) > 6:
     st.error(f"⚠️ You can only select up to 6 options.")
 else:
@@ -336,6 +342,7 @@ else:
                                     is_true_dotted=False,                                    
                                     y_limit = [y_min, y_max],
                                     col_palette=sns.color_palette("tab10", len(df_all.type.unique())))
+    st.subheader("Year vs Log-Rate All Sexes and Causes")
     st.pyplot(fig)
 
     # Plot combined year vs log_mortality (1 sex and 1 cause)
@@ -344,6 +351,7 @@ else:
     fig.suptitle(f'Year vs Log-Rate {sex}-{cause} for various models')
     sns.lineplot(data=df_all.loc[(df_all.sex == sex_code) & (df_all.cause==cause_code) & (df_all.age == age)], 
                  x='year', y='log_mortality', style='type', hue='type')
+    st.subheader(f"Age vs Log-Rate for {sex} and {cause}")
     st.pyplot(fig)
 
     # Plot focused age vs log_mortality
@@ -360,4 +368,5 @@ else:
                        x='year', y='log_mortality', hue='age', ax=ax[0], palette="viridis")
     sns.lineplot(data=df_m_long.loc[(df_m_long.sex == sex_code) & (df_m_long.cause==cause_code)], 
                        x='year', y='log_mortality', hue='age', ax=ax[1], palette="viridis")
+    st.subheader(f"Year vs Log-Rate for {sex} and {cause} and {model} model only")
     st.pyplot(fig)
