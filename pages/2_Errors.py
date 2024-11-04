@@ -201,6 +201,7 @@ def load_res_deep(folder):
         # Load the files
         folder_name = f"{folder}HEC/"
         res_hec, model_names_hec = py_utils_general.load_all_dfs(folder_name, 'res')
+        st.write(model_names_hec)
 
         # Adjust the data type and ranges
         for idx in range(0, len(res_hec)):
