@@ -187,9 +187,13 @@ def load_pred_deep(folder):
     subfolders = [f.name for f in os.scandir(folder) if f.is_dir()]
 
     # Model from HEC    
-    if("HEC" in subfolders):
+    if("HEC" in subfolders):        
         # Load the files
         folder_name = f"{folder}HEC/"
+
+        st.write(subfolders)
+        st.write(folder_name)
+        
         dfs_hec, model_names_hec = py_utils_general.load_all_dfs(folder_name, 'df')
 
         # Adjust the data type and ranges
