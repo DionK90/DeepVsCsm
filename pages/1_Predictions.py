@@ -6,14 +6,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib
 
-import bidict
-
 import py_params
 import py_hmd_data
 from py_hmd_data import HmdMortalityData, HmdResidual, HmdError
 import py_utils_general
-import pickle
 
+import os
+import pickle
 
 ##########################################
 ### Functions to Adjust Mortality Data ###
@@ -162,6 +161,7 @@ def load_pred_csm(folder):
 
     return dict_csm, csm_model_names
 
+
 @st.cache_data
 def load_pred_deep(folder):
     # Load the first best deep model for various age ranges
@@ -175,14 +175,46 @@ def load_pred_deep(folder):
     # Load the third best deep model for various age ranges
     with open(f"{folder}df_all_fcnn_hmd_cod_17_lmxt_scaled_sig_4096.pickle", "rb") as outfile:
         df_deep_3_0_99 = pickle.load(outfile)
-
+    
+    # Naming the above models
     deep_model_names = ['deep6_1_mxt_256_00_99', 'deep6_1_lmxt_256_00_99', 'deep6_17_lmxt_4096_00_99']
-
     adjust_age_sex_cause(df_deep_1_0_99, deep_model_names[0], is_age_str=False)
     adjust_age_sex_cause(df_deep_2_0_99, deep_model_names[1], is_age_str=False)
     adjust_age_sex_cause(df_deep_3_0_99, deep_model_names[2], is_age_str=False)
+    dfs = [df_deep_1_0_99, df_deep_2_0_99, df_deep_3_0_99]
     
-    dict_deep = {key:value for key, value in zip(deep_model_names, [df_deep_1_0_99, df_deep_2_0_99, df_deep_3_0_99])}
+    # Get all immediate subfolders
+    subfolders = [f.name for f in os.scandir(folder) if f.is_dir()]
+
+    # Model from HEC    
+    if("HEC" in subfolders):
+        # Load the files
+        folder_name = "/Results Intermediate/DEEP models/HEC"
+        dfs_hec, model_names_hec = py_utils_general.load_all_dfs(folder_name, 'df')
+
+        # Adjust the data type and ranges
+        for idx in range(0, len(dfs_hec)):
+            adjust_age_sex_cause(dfs_hec[idx], model_names_hec[idx], is_age_str=False)        
+
+        # Add them to the collections to be returned
+        deep_model_names = deep_model_names + model_names_hec
+        dfs = dfs + dfs_hec
+
+    # Model from DELL
+    if("Dell" in subfolders):
+        # Load the files
+        folder_name = "/Results Intermediate/DEEP models/Dell"
+        dfs_dell, model_names_dell = py_utils_general.load_all_dfs(folder_name, 'df')
+
+        # Adjust the data type and ranges
+        for idx in range(0, len(dfs_dell)):
+            adjust_age_sex_cause(dfs_dell[idx], model_names_dell[idx], is_age_str=False)        
+        
+        # Add them to the collections to be returned
+        deep_model_names = deep_model_names + model_names_dell
+        dfs = dfs + dfs_dell
+    
+    dict_deep = {key:value for key, value in zip(deep_model_names, dfs)}
 
     return dict_deep, deep_model_names
 

@@ -9,9 +9,11 @@ import bidict
 
 import py_params
 import py_hmd_data
+import py_utils_general
 from py_hmd_data import HmdMortalityData, HmdResidual, HmdError
 
 import pickle
+import os
 
 
 ##########################################
@@ -187,10 +189,48 @@ def load_res_deep(folder):
         adjust_age_sex_cause(res_deep_3_0_99.df_res, model_name=None, is_age_str=False)
         adjust_age_sex_cause(res_deep_3_0_99.df_true, model_name=None, is_age_str=False)
         adjust_age_sex_cause(res_deep_3_0_99.df_pred, model_name=None, is_age_str=False)
-
-        
+    
     deep_model_names = ['deep6_1_mxt_256_00_99', 'deep6_1_lmxt_256_00_99', 'deep6_17_lmxt_4096_00_99']    
-    dict_deep = {key:value for key, value in zip(deep_model_names, [res_deep_1_0_99, res_deep_2_0_99, res_deep_3_0_99])}
+    res = [res_deep_1_0_99, res_deep_2_0_99, res_deep_3_0_99]
+
+    # Get all immediate subfolders
+    subfolders = [f.name for f in os.scandir(folder) if f.is_dir()]
+
+    # Model from HEC    
+    if("HEC" in subfolders):
+        # Load the files
+        folder_name = "/Results Intermediate/DEEP models/HEC"
+        res_hec, model_names_hec = py_utils_general.load_all_dfs(folder_name, 'res')
+
+        # Adjust the data type and ranges
+        for idx in range(0, len(res_hec)):
+            adjust_age_sex_cause(res_hec[idx].df_res, model_name=None, is_age_str=False)
+            adjust_age_sex_cause(res_hec[idx].df_true, model_name=None, is_age_str=False)
+            adjust_age_sex_cause(res_hec[idx].df_pred, model_name=None, is_age_str=False)            
+
+        # Add them to the collections to be returned
+        deep_model_names = deep_model_names + model_names_hec
+        res = res + res_hec
+
+    # Model from DELL
+    if("Dell" in subfolders):
+        # Load the files
+        folder_name = "/Results Intermediate/DEEP models/Dell"
+        res_dell, model_names_dell = py_utils_general.load_all_dfs(folder_name, 'res')
+
+        # Adjust the data type and ranges
+        for idx in range(0, len(res_dell)):
+            adjust_age_sex_cause(res_dell[idx].df_res, model_name=None, is_age_str=False)
+            adjust_age_sex_cause(res_dell[idx].df_true, model_name=None, is_age_str=False)
+            adjust_age_sex_cause(res_dell[idx].df_pred, model_name=None, is_age_str=False)
+        
+        # Add them to the collections to be returned
+        deep_model_names = deep_model_names + model_names_dell
+        res = res + res_dell
+    # Add models from HEC
+
+
+    dict_deep = {key:value for key, value in zip(deep_model_names, res)}
     return dict_deep, deep_model_names
 
 ##########################
