@@ -199,7 +199,7 @@ def load_res_deep(folder):
     # Model from HEC    
     if("HEC" in subfolders):
         # Load the files
-        folder_name = "/Results Intermediate/DEEP models/HEC"
+        folder_name = f"{folder}HEC/"
         res_hec, model_names_hec = py_utils_general.load_all_dfs(folder_name, 'res')
 
         # Adjust the data type and ranges
@@ -215,7 +215,7 @@ def load_res_deep(folder):
     # Model from DELL
     if("Dell" in subfolders):
         # Load the files
-        folder_name = "/Results Intermediate/DEEP models/Dell"
+        folder_name = f"{folder}Dell/"
         res_dell, model_names_dell = py_utils_general.load_all_dfs(folder_name, 'res')
 
         # Adjust the data type and ranges
