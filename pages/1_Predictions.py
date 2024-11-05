@@ -274,7 +274,7 @@ st.title('Neural Networks vs Classical Stochastic Models')
 st.sidebar.markdown("# Control for Predictions")
 
 # Slider for selecting a year range (1959 to 1999)
-year = st.sidebar.slider("Select year", min_value=1959, max_value=1999, value=1970)
+year = st.sidebar.slider("Select year", min_value=MIN_YEAR_TRAIN, max_value=MAX_YEAR_TEST, value=1970)
 
 # Select models to be plotted
 models = st.sidebar.multiselect("Select up to 6 models for the combined plots:", 
