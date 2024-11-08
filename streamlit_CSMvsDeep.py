@@ -10,6 +10,8 @@ import py_utils_general
 import py_params
 import py_hmd_data
 
+from py_hmd_data import HmdMortalityData, HmdResidual, HmdError
+
 ##########################################
 ### Functions to Adjust Mortality Data ###
 ##########################################

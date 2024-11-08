@@ -7,12 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 
 import py_params
-import py_hmd_data
-from py_hmd_data import HmdMortalityData, HmdResidual, HmdError
 import py_utils_general
 
-import os
-import pickle
 
 ##########################
 ### Parameter for data ###
