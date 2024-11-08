@@ -281,3 +281,6 @@ if 'df_all' not in st.session_state:
     st.session_state.model_names = model_names
     st.session_state.y_min_log = y_min_log
     st.session_state.y_max_log = y_max_log
+    st.write("Data loaded successfully")
+else:
+    st.write("Data has been loaded previously")
