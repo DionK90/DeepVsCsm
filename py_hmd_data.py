@@ -909,7 +909,7 @@ class HmdError():
         self.df_error = self.df_error.drop(self.df_error.loc[(self.df_error.model.isin(model_name))].index)
 
     def lineplot_sex_type(self, x:str, hue:str, style:str,
-                          filter_cols_str:List[str]=None, filter_values_str:List[str]=None,
+                          filter_cols_str:List[str]=None, filter_values_str:List[List[str]]=None,
                           filter_cols_num:List[int]=None, filter_values_num:List[int]=None):
         """
         """
@@ -934,7 +934,7 @@ class HmdError():
             if(len(filter_cols_str) != len(filter_values_str)):
                 raise ValueError("The number of values does not match the number of column to filter.")
             for idx, col in enumerate(filter_cols_str):
-                df_temp = df_temp.loc[df_temp[col] == filter_values_str[idx], :]
+                df_temp = df_temp.loc[df_temp[col].isin(filter_values_str[idx]), :]
         if(filter_cols_num is not None):
             # Check the filter first
             if(len(filter_cols_num) != len(filter_values_num)):
@@ -965,7 +965,7 @@ class HmdError():
         return fig
     
     def barplot_sex_type(self, x:str, hue:str,
-                         filter_cols_str:List[str]=None, filter_values_str:List[str]=None,
+                         filter_cols_str:List[str]=None, filter_values_str:List[List[str]]=None,
                          filter_cols_num:List[int]=None, filter_values_num:List[int]=None):
         """
         Args:
@@ -985,13 +985,13 @@ class HmdError():
         fig.suptitle(title)
         
         # Filter the data according to given filter
-        df_temp = self.df_error
+        df_temp = self.df_error        
         if(filter_cols_str is not None):
             # Check the filter first
             if(len(filter_cols_str) != len(filter_values_str)):
                 raise ValueError("The number of values does not match the number of column to filter.")
             for idx, col in enumerate(filter_cols_str):
-                df_temp = df_temp.loc[df_temp[col] == filter_values_str[idx], :]
+                df_temp = df_temp.loc[df_temp[col].isin(filter_values_str[idx]), :]
         if(filter_cols_num is not None):
             # Check the filter first
             if(len(filter_cols_num) != len(filter_values_num)):

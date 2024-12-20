@@ -53,6 +53,9 @@ else:
     ###################
     st.sidebar.markdown("# Control for Predictions")
 
+    is_overall_log = st.sidebar.checkbox("Plot All Log-Rate", value=True)
+    is_overall_rate = st.sidebar.checkbox("Plot All Rate", value=False)
+
     # Slider for selecting a year range (1959 to 1999)
     year = st.sidebar.slider("Select year", min_value=MIN_YEAR_TRAIN, max_value=MAX_YEAR_TEST, value=1970)
 
@@ -81,46 +84,54 @@ else:
     if len(models) > MAX_MODELS:
         st.error(f"⚠️ You can only select up to {MAX_MODELS} options.")
     else:    
-        # Plot combined age vs log_mortality (all sexes and causes)    
+        # Plot combined age vs log_mortality (all sexes and causes)
         df_filtered = df_all.loc[df_all.type.isin(models + [py_params.TYPE_TRUE])]
         y_min_log = df_filtered.loc[df_filtered.year == year]['log_mortality'].min()
         y_max_log = df_filtered.loc[df_filtered.year == year]['log_mortality'].max()
-        fig, _ = py_utils_general.plot_age_mortality_model(df_filtered,
-                                                row_feature_name='sex', row_feature_values=[1,2], 
-                                                row_labels=py_params.BIDICT_SEX_1_2,
-                                                col_feature_name='cause', 
-                                                col_feature_values=df_filtered['cause'].unique(),
-                                                col_labels=dict(py_params.BIDICT_CAUSE_1_HMD),
-                                                value='log_mortality',
-                                                years=[year],
-                                                types=df_filtered.type.unique(),
-                                                title_fig = f"Age vs Log-Rate for various models ({year} - {'train' if year <= MAX_YEAR_TRAIN else 'test'})",
-                                                is_fig_saved=False,
-                                                ages=list(df_filtered['age'].unique()), y_limit=[y_min_log, y_max_log],
-                                                col_palette=sns.color_palette("tab10", len(df_filtered.type.unique())))
-        st.subheader("Age vs Log-Rate All Sexes and Causes")
-        st.pyplot(fig)
 
-        # Plot combined age vs log_mortality (all sexes and causes)    
-        fig, _ = py_utils_general.plot_age_mortality_model(df_filtered,
-                                                row_feature_name='sex', row_feature_values=[1,2], 
-                                                row_labels=py_params.BIDICT_SEX_1_2,
-                                                col_feature_name='cause', 
-                                                col_feature_values=df_filtered['cause'].unique(),
-                                                col_labels=dict(py_params.BIDICT_CAUSE_1_HMD),
-                                                value='mortality',
-                                                years=[year],
-                                                types=df_filtered.type.unique(),
-                                                title_fig = f"Age vs Log-Rate for various models ({year} - {'train' if year <= MAX_YEAR_TRAIN else 'test'})",
-                                                is_fig_saved=False,
-                                                ages=list(df_filtered['age'].unique()), 
-                                                y_limit = [np.exp(y_min_log), np.exp(y_max_log)],
-                                                col_palette=sns.color_palette("tab10", len(df_filtered.type.unique())))
-        st.subheader("Age vs Rate All Sexes and Causes")
-        st.pyplot(fig)
+        st.subheader("Age vs Log-Rate All Sexes and Causes", divider='blue')
+        if is_overall_log:
+            fig, _ = py_utils_general.plot_age_mortality_model(df_filtered,
+                                                    row_feature_name='sex', row_feature_values=[1,2], 
+                                                    row_labels=py_params.BIDICT_SEX_1_2,
+                                                    col_feature_name='cause', 
+                                                    col_feature_values=df_filtered['cause'].unique(),
+                                                    col_labels=dict(py_params.BIDICT_CAUSE_1_HMD),
+                                                    value='log_mortality',
+                                                    years=[year],
+                                                    types=df_filtered.type.unique(),
+                                                    title_fig = f"Age vs Log-Rate for various models ({year} - {'train' if year <= MAX_YEAR_TRAIN else 'test'})",
+                                                    is_fig_saved=False,
+                                                    ages=list(df_filtered['age'].unique()), y_limit=[y_min_log, y_max_log],
+                                                    col_palette=sns.color_palette("tab10", len(df_filtered.type.unique())))        
+            st.pyplot(fig)
+        else:
+            st.write("Please check the checkbox on the left to plot this part.")
+
+        # Plot combined age vs log_mortality (all sexes and causes)
+        st.subheader("Age vs Rate All Sexes and Causes", divider='blue')
+        if is_overall_rate:
+            fig, _ = py_utils_general.plot_age_mortality_model(df_filtered,
+                                                    row_feature_name='sex', row_feature_values=[1,2], 
+                                                    row_labels=py_params.BIDICT_SEX_1_2,
+                                                    col_feature_name='cause', 
+                                                    col_feature_values=df_filtered['cause'].unique(),
+                                                    col_labels=dict(py_params.BIDICT_CAUSE_1_HMD),
+                                                    value='mortality',
+                                                    years=[year],
+                                                    types=df_filtered.type.unique(),
+                                                    title_fig = f"Age vs Log-Rate for various models ({year} - {'train' if year <= MAX_YEAR_TRAIN else 'test'})",
+                                                    is_fig_saved=False,
+                                                    ages=list(df_filtered['age'].unique()), 
+                                                    y_limit = [np.exp(y_min_log), np.exp(y_max_log)],
+                                                    col_palette=sns.color_palette("tab10", len(df_filtered.type.unique())))            
+            st.pyplot(fig)
+        else:
+            st.write("Please check the checkbox on the left to plot this part.")
 
             
-        # Plot combined age vs log_mortality (1 sex and 1 cause)    
+        # Plot combined age vs log_mortality (1 sex and 1 cause)
+        st.subheader("Age for Specific Sex-Cause", divider="blue")
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)
         fig, ax = plt.subplots()
         fig.suptitle(f'Age vs Log-Rate {sex}-{cause} ({year})')
@@ -140,7 +151,8 @@ else:
 
         # Plot focused age vs log_mortality
         # df_pred_focus = dict_pred[model]
-        # df_pred_focus['log_mortality'] = np.log(df_pred_focus['mortality'])    
+        # df_pred_focus['log_mortality'] = np.log(df_pred_focus['mortality'])
+        st.subheader("Age for Specific Sex-Cause-Model", divider='blue')
         df_pred_focus = df_filtered.loc[df_filtered.type == model]    
         df_true = df_all.loc[df_all.type == py_params.TYPE_TRUE]
         matplotlib.rcParams.update(matplotlib.rcParamsDefault)

@@ -93,33 +93,28 @@ def plot_year_value(df_final_long: pd.DataFrame,
             # Plot different series based on its colour (all age groups)
             # for age_idx, age in enumerate(ages):
             for hue_idx, hue_val in enumerate(hue_feature_values):
-                # Plot the true value
+                # Extract the values for a given row, col, and hue (sex, cause, and age)
                 df_curr = df_final_long.loc[(df_final_long[row_feature_name] == row_val) & 
                                             (df_final_long[col_feature_name] == col_val) & 
-                                            (df_final_long[hue_feature_name] == hue_val) & 
-                                            (df_final_long[py_params.COL_TYPE] == py_params.TYPE_TRUE)]            
+                                            (df_final_long[hue_feature_name] == hue_val)]
+                # Plot the true value
+                df_true = df_curr.loc[(df_curr[py_params.COL_TYPE] == py_params.TYPE_TRUE)]
                 if(is_true_dotted):
-                    curr_ax.scatter(df_curr['year'], df_curr[value], label=hue_val, color=col_palette[hue_idx], s=0.5)
+                    curr_ax.scatter(df_true['year'], df_true[value], label=hue_val, color=col_palette[hue_idx], s=0.5)
                 else:
-                    curr_ax.plot(df_curr['year'], df_curr[value], label=hue_val, color=col_palette[hue_idx], 
+                    curr_ax.plot(df_true['year'], df_true[value], label=hue_val, color=col_palette[hue_idx], 
                                  linewidth=1, linestyle='solid')                    
                 
                 # Plot the predicted value            
                 for type_idx, prediction_type in enumerate(predicted_types):
-                    df_curr = df_final_long.loc[(df_final_long[row_feature_name] == row_val) & 
-                                                (df_final_long[col_feature_name] == col_val) & 
-                                                (df_final_long[hue_feature_name] == hue_val) & 
-                                                (df_final_long['type'] == prediction_type)]
+                    df_pred = df_curr.loc[(df_curr['type'] == prediction_type)]
                     if(is_true_dotted):
-                        curr_ax.plot(df_curr['year'], df_curr[value], color=col_palette[hue_idx], 
+                        curr_ax.plot(df_pred['year'], df_pred[value], color=col_palette[hue_idx], 
                                  linewidth=1, linestyle="-")                           
                     else:
-                        curr_ax.plot(df_curr['year'], df_curr[value], color=col_palette[hue_idx], 
+                        curr_ax.plot(df_pred['year'], df_pred[value], color=col_palette[hue_idx], 
                                      linewidth=1, linestyle=py_params.LINESTYLES[type_idx])
-                
-                
-                    
-                                    
+                     
             # Specify the y-axis limits
             if y_limit != None:
                 curr_ax.set_ylim(y_limit[0], y_limit[1])  # Set y-axis limits
@@ -147,14 +142,21 @@ def plot_year_value(df_final_long: pd.DataFrame,
     handles, labels = legend_ax.get_legend_handles_labels()    
     
     # Set the colorbar if hue includes many values
-    if(len(hue_feature_values) > 10):
+    if((len(hue_feature_values) > 10 and type(hue_feature_values[0]) != str) or
+       hue_feature_name == "age"):
+        # Work only if hue_feature_values is already a digit, i.e. `year`
         num_hue_values = hue_feature_values
+
+        # If age is used to determine the color
         if(hue_feature_name == "age"):
             num_hue_values = list()
+            # Extract the digit part of age when age is not completely a number(e.g. m20, lm21, etc.)
             for age in hue_feature_values:
                 num = [each for each in age if str(each).isdigit()]
                 num = int(''.join(num))
                 num_hue_values.append(num)
+
+        # If hue is determined 
 
         norm = plt.Normalize(min(num_hue_values), max(num_hue_values))
         sm = plt.cm.ScalarMappable(cmap="viridis", norm=norm)
@@ -166,8 +168,6 @@ def plot_year_value(df_final_long: pd.DataFrame,
         cbar.set_label(hue_feature_name, rotation=90)
         handles = []
         labels = []        
-
-    
     
     # Add legends for each linestyle (type)
     if(len(types) != len(hue_feature_values) or all(types != hue_feature_values)):
@@ -199,8 +199,8 @@ def plot_year_value(df_final_long: pd.DataFrame,
     ncol_legend = len(hue_feature_values)/2 if len(hue_feature_values) > 1 else 1
 
     # Set the legend
-    fig.legend(handles=all_handles, labels=all_labels, loc='upper right',
-            fancybox=True, shadow=True)
+    fig.legend(handles=all_handles, labels=all_labels, loc='upper right', prop={'size': 12})
+    # fig.legend(handles=all_handles, labels=all_labels, loc='upper right')
     fig.suptitle(title_fig, fontsize=24)
     fig.subplots_adjust(top=0.9, right=0.8)
     if(is_fig_saved):
@@ -354,8 +354,7 @@ def plot_age_mortality_year(df_long: pd.DataFrame,
 
     # Set the legend
     # print(legend_linestyle)
-    fig.legend(handles=all_handles, labels=all_labels, loc='upper right',
-            fancybox=True, shadow=True)
+    fig.legend(handles=all_handles, labels=all_labels, loc='upper right', prop={'size': 12})
     fig.suptitle(title_fig, fontsize=24)
     fig.subplots_adjust(top=0.9, right=0.8)
     if(is_fig_saved):
@@ -516,7 +515,7 @@ def plot_age_mortality_model(df_long: pd.DataFrame,
     # Set the legend
     # print(legend_linestyle)
     fig.legend(handles=all_handles, labels=all_labels, loc='upper right',
-            fancybox=True, shadow=True)
+            prop={'size': 12})
     fig.suptitle(title_fig, fontsize=24)
     fig.subplots_adjust(top=0.9, right=0.8)
     if(is_fig_saved):

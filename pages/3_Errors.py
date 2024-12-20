@@ -293,8 +293,8 @@ MAX_YEAR_TRAIN = 1999
 MAX_YEAR_VALID = 1999
 MAX_YEAR_TEST = 2017
 countries = [py_params.BIDICT_COUNTRY_HMD['USA']]
-sexes = [0, 1]
-causes = [0, 1, 2, 3, 4, 5]
+sexes = [1, 2]
+causes = [1, 2, 3, 4, 5, 6]
 years = list(range(1959, 2018))
 ages = list(range(AGE_START, AGE_END))
 DEFAULT_MODELS = ['LC_SVD_00_99', 'APC_00_99', 'RH_00_99',
@@ -338,13 +338,28 @@ st.title('Neural Networks vs Classical Stochastic Models')
 
 st.sidebar.markdown("# Control for Errors")
 
+is_overall = st.sidebar.checkbox("Plot Overall Error", value=True)
+is_over_cause = st.sidebar.checkbox("Plot Error Over Cause", value=True)
+is_over_age = st.sidebar.checkbox("Plot Error Over Age", value=False)
+is_over_year = st.sidebar.checkbox("Plot Error Over Year", value=False)
+
 # Select models for the errors
 models_err = st.sidebar.multiselect("Select models for the errors", 
                                     model_names,
                                     DEFAULT_MODELS)
-st.write(f"Selected models: {models_err}")
 cause = st.sidebar.selectbox("Select cause for larger comparison", options=list(py_params.BIDICT_CAUSE_1_HMD.values())[1:])
 cause_code = py_params.BIDICT_CAUSE_1_HMD.inverse[cause.lower()]
+
+st.sidebar.write("Select causes to be excluded in in 'MSE over cause' plot:")
+is_cir = st.sidebar.checkbox("Circulatory", value=False)
+is_neo = st.sidebar.checkbox("Neoplasm", value=False)
+is_res = st.sidebar.checkbox("Respiratory", value=False)
+is_dig = st.sidebar.checkbox("Digestive", value=False)
+is_ext = st.sidebar.checkbox("External", value=False)
+is_oth = st.sidebar.checkbox("Other", value=False)
+included_causes = [not is_cir, not is_neo, not is_res, not is_dig, not is_ext, not is_oth]
+included_causes = [cause for (cause, fil) in zip(causes, included_causes) if fil] 
+
 
 ##############
 ### Errors ###
@@ -366,24 +381,27 @@ errors_cause = py_hmd_data.aggregate_errors(residuals=res_curr, res_names=models
                                                  error_types=error_types)
 
 st.header("Overall MSE", divider=True)
-fig = errors.barplot_sex_type(x='measure', hue='model')
-st.pyplot(fig)
+if(is_overall):
+    fig = errors.barplot_sex_type(x='measure', hue='model')
+    st.pyplot(fig)
+else:
+    st.write("Please check the checkbox on the left to plot this part.")
 
-st.header("Overall MSE over the age", divider=True)
-fig = errors_age.lineplot_sex_type(x='age', hue='model', style='model', filter_cols_str=['measure'], filter_values_str=['mse'])
-st.pyplot(fig)
+st.header("MSE per cause", divider=True)
+if is_over_cause:
+    fig = errors_cause.barplot_sex_type(x='cause', hue='model', filter_cols_str=['measure', 'cause'], filter_values_str=[['mse'], included_causes])
+    st.pyplot(fig)
+else:
+    st.write("Please check the checkbox on the left to plot this part.")
 
-st.header("Overall MSE per cause", divider=True)
-fig = errors_cause.barplot_sex_type(x='cause', hue='model', filter_cols_str=['measure'], filter_values_str=['mse'])
-st.pyplot(fig)
-
+st.subheader(f"MSE for {cause}", divider="red")
 # Plot comparison for a specific cause
 fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12,12), sharex=True, sharey=True)
 ax[0][0].set_title(f"Test Male")
 ax[0][1].set_title(f"Test Female")
 ax[1][0].set_title(f"Train Male")
 ax[1][1].set_title(f"Train Female")
-fig.suptitle(f"Overall MSE for {cause}")
+fig.suptitle(f"MSE for {cause}")
 
 # st.table(errors_cause.df_error)
 
@@ -395,14 +413,26 @@ for idx_type, each_type in enumerate(['test', 'train']):
             is_legend = True
         sns.barplot(x='model', y=errors_cause._col_err, hue='model', 
                     data=errors_cause.df_error.loc[(errors_cause.df_error.type == each_type) & 
-                                                   (errors_cause.df_error.sex == idx_sex+1) & 
-                                                   (errors_cause.df_error.cause == cause_code),:],
+                                                (errors_cause.df_error.sex == idx_sex+1) & 
+                                                (errors_cause.df_error.cause == cause_code),:],
                                                     ax=ax[idx_type][idx_sex], errorbar=None, legend=is_legend)
 st.pyplot(fig)
 
-st.header("Overall MSE over the year", divider=True)
-fig = errors_year.lineplot_sex_type(x='year', hue='model', style='model', filter_cols_str=['measure'], filter_values_str=['mse'])
-st.pyplot(fig)
+st.header("MSE over the age", divider=True)
+if is_over_age:        
+    fig = errors_age.lineplot_sex_type(x='age', hue='model', style='model', filter_cols_str=['measure'], filter_values_str=['mse'])
+    st.pyplot(fig)
+else:
+    st.write("Please check the checkbox on the left to plot this part.")
+
+
+
+st.header("MSE over the year", divider=True)
+if is_over_year:
+    fig = errors_year.lineplot_sex_type(x='year', hue='model', style='model', filter_cols_str=['measure'], filter_values_str=['mse'])
+    st.pyplot(fig)
+else:
+    st.write("Please check the checkbox on the left to plot this part.")
 
 st.header("DEEP vs CSM Table", divider=True)
 st.write(
