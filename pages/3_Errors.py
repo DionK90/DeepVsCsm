@@ -437,5 +437,9 @@ for deep_name in deep_model_names:
     dict_df_mse[deep_name] = df_sum
 
     # Display the table
-    st.subheader(deep_name)
+    if(deep_name in models_err):
+        subheader = f':red[{deep_name}]'
+    else:
+        subheader = f'{deep_name}'
+    st.subheader(subheader)
     st.table(dict_df_mse[deep_name])
