@@ -14,6 +14,7 @@ from py_hmd_data import HmdMortalityData, HmdResidual, HmdError
 
 import pickle
 import os
+import asizeof
 
 
 ##########################################
@@ -92,9 +93,15 @@ def adjust_age_sex_cause(df:pd.DataFrame,
 
 @st.cache_data
 def load_res_csm(folder):    
-    csm_model_names = ['LC_SVD_00_99', 'LC_SVD_00_85', 'LC_SVD_20_99', 'LC_SVD_20_85',                       
-                       'APC_00_99', 'APC_00_85', 'APC_20_99', 'APC_20_85',
-                       'RH_00_99', 'RH_00_85', 'RH_20_99', 'RH_20_85',]
+    # csm_model_names = ['LC_SVD_00_99', 'LC_SVD_00_85', 'LC_SVD_20_99', 'LC_SVD_20_85',                       
+    #                    'APC_00_99', 'APC_00_85', 'APC_20_99', 'APC_20_85',
+    #                    'RH_00_99', 'RH_00_85', 'RH_20_99', 'RH_20_85',]
+    # csm_model_names = ['LC_SVD_00_99', 
+    #                    'APC_00_99', 
+    #                    'RH_00_99']
+    csm_model_names = ['LC_SVD_00_99', 'LC_SVD_00_85', 'LC_SVD_20_85',
+                       'APC_00_99', 'APC_00_85', 'APC_20_85',
+                       'RH_00_99', 'RH_00_85', 'RH_20_85']
 
     # Load the LC residuals for various age range 
     with open(f"{folder}res_lc_svd_0_99.pickle", "rb") as outfile:
@@ -102,21 +109,21 @@ def load_res_csm(folder):
         adjust_age_sex_cause(res_lc_svd_0_99.df_true, model_name=None)
         adjust_age_sex_cause(res_lc_svd_0_99.df_res, model_name=None)
         adjust_age_sex_cause(res_lc_svd_0_99.df_pred, model_name=None)
-    with open(f"{folder}res_lc_svd_20_99.pickle", "rb") as outfile:
-        res_lc_svd_20_99 = pickle.load(outfile)
-        adjust_age_sex_cause(res_lc_svd_20_99.df_true, model_name=None)
-        adjust_age_sex_cause(res_lc_svd_20_99.df_res, model_name=None)
-        adjust_age_sex_cause(res_lc_svd_20_99.df_pred, model_name=None)    
+    # with open(f"{folder}res_lc_svd_20_99.pickle", "rb") as outfile:
+    #     res_lc_svd_20_99 = pickle.load(outfile)
+    #     adjust_age_sex_cause(res_lc_svd_20_99.df_true, model_name=None)
+    #     adjust_age_sex_cause(res_lc_svd_20_99.df_res, model_name=None)
+    #     adjust_age_sex_cause(res_lc_svd_20_99.df_pred, model_name=None)
     with open(f"{folder}res_lc_svd_0_85.pickle", "rb") as outfile:
         res_lc_svd_0_85 = pickle.load(outfile)
         adjust_age_sex_cause(res_lc_svd_0_85.df_true, model_name=None)
         adjust_age_sex_cause(res_lc_svd_0_85.df_res, model_name=None)
-        adjust_age_sex_cause(res_lc_svd_0_85.df_pred, model_name=None)    
+        adjust_age_sex_cause(res_lc_svd_0_85.df_pred, model_name=None)
     with open(f"{folder}res_lc_svd_20_85.pickle", "rb") as outfile:
         res_lc_svd_20_85 = pickle.load(outfile)
         adjust_age_sex_cause(res_lc_svd_20_85.df_true, model_name=None)
         adjust_age_sex_cause(res_lc_svd_20_85.df_res, model_name=None)
-        adjust_age_sex_cause(res_lc_svd_20_85.df_pred, model_name=None)    
+        adjust_age_sex_cause(res_lc_svd_20_85.df_pred, model_name=None)
 
     # Load the RH residuals for various age range
     with open(f"{folder}res_rh_0_99.pickle", "rb") as outfile:
@@ -124,11 +131,11 @@ def load_res_csm(folder):
         adjust_age_sex_cause(res_rh_0_99.df_true, model_name=None)
         adjust_age_sex_cause(res_rh_0_99.df_res, model_name=None)
         adjust_age_sex_cause(res_rh_0_99.df_pred, model_name=None)    
-    with open(f"{folder}res_rh_20_99.pickle", "rb") as outfile:
-        res_rh_20_99 = pickle.load(outfile)
-        adjust_age_sex_cause(res_rh_20_99.df_true, model_name=None)
-        adjust_age_sex_cause(res_rh_20_99.df_res, model_name=None)
-        adjust_age_sex_cause(res_rh_20_99.df_pred, model_name=None)
+    # with open(f"{folder}res_rh_20_99.pickle", "rb") as outfile:
+    #     res_rh_20_99 = pickle.load(outfile)
+    #     adjust_age_sex_cause(res_rh_20_99.df_true, model_name=None)
+    #     adjust_age_sex_cause(res_rh_20_99.df_res, model_name=None)
+    #     adjust_age_sex_cause(res_rh_20_99.df_pred, model_name=None)
     with open(f"{folder}res_rh_0_85.pickle", "rb") as outfile:
         res_rh_0_85 = pickle.load(outfile)
         adjust_age_sex_cause(res_rh_0_85.df_true, model_name=None)
@@ -146,11 +153,11 @@ def load_res_csm(folder):
         adjust_age_sex_cause(res_apc_0_99.df_true, model_name=None)
         adjust_age_sex_cause(res_apc_0_99.df_res, model_name=None)
         adjust_age_sex_cause(res_apc_0_99.df_pred, model_name=None)
-    with open(f"{folder}res_apc_20_99.pickle", "rb") as outfile:
-        res_apc_20_99 = pickle.load(outfile)
-        adjust_age_sex_cause(res_apc_20_99.df_true, model_name=None)
-        adjust_age_sex_cause(res_apc_20_99.df_res, model_name=None)
-        adjust_age_sex_cause(res_apc_20_99.df_pred, model_name=None)
+    # with open(f"{folder}res_apc_20_99.pickle", "rb") as outfile:
+    #     res_apc_20_99 = pickle.load(outfile)
+    #     adjust_age_sex_cause(res_apc_20_99.df_true, model_name=None)
+    #     adjust_age_sex_cause(res_apc_20_99.df_res, model_name=None)
+    #     adjust_age_sex_cause(res_apc_20_99.df_pred, model_name=None)
     with open(f"{folder}res_apc_0_85.pickle", "rb") as outfile:
         res_apc_0_85 = pickle.load(outfile)
         adjust_age_sex_cause(res_apc_0_85.df_true, model_name=None)
@@ -162,10 +169,27 @@ def load_res_csm(folder):
         adjust_age_sex_cause(res_apc_20_85.df_res, model_name=None)
         adjust_age_sex_cause(res_apc_20_85.df_pred, model_name=None)
 
+    # dict_csm = {key:value for key, value in zip(csm_model_names, 
+    #                                             [res_lc_svd_0_99, res_lc_svd_0_85, res_lc_svd_20_99, res_lc_svd_20_85,
+    #                                              res_apc_0_99, res_apc_0_85, res_apc_20_99, res_apc_20_85, 
+    #                                              res_rh_0_99, res_rh_0_85, res_rh_20_99, res_rh_20_85])}
+    # dict_csm = {key:value for key, value in zip(csm_model_names, 
+    #                                             [res_lc_svd_0_99,
+    #                                              res_apc_0_99,
+    #                                              res_rh_0_99])}
     dict_csm = {key:value for key, value in zip(csm_model_names, 
-                                                [res_lc_svd_0_99, res_lc_svd_0_85, res_lc_svd_20_99, res_lc_svd_20_85,
-                                                 res_apc_0_99, res_apc_0_85, res_apc_20_99, res_apc_20_85, 
-                                                 res_rh_0_99, res_rh_0_85, res_rh_20_99, res_rh_20_85])}
+                                                [res_lc_svd_0_99, res_lc_svd_0_85, res_lc_svd_20_85,
+                                                 res_apc_0_99, res_apc_0_85, res_apc_20_85, 
+                                                 res_rh_0_99, res_rh_0_85, res_rh_20_85])}
+    
+    # Minimize the memory consumption of the residuals
+    for key in dict_csm.keys():
+        if 'country' in dict_csm[key].df_true.columns:
+            cols_drop = ['country']
+        else:
+            cols_drop = []        
+        dict_csm[key].minimize_memory(cols_drop = cols_drop, cols_int = ['age', 'sex', 'cause', 'year'])
+
     return dict_csm, csm_model_names
 
 @st.cache_data
@@ -197,42 +221,66 @@ def load_res_deep(folder):
     # Get all immediate subfolders
     subfolders = [f.name for f in os.scandir(folder) if f.is_dir()]
 
-    # Model from HEC    
-    if("HEC" in subfolders):
+    # Model from Best
+    if("Best" in subfolders):
         # Load the files
-        folder_name = f"{folder}HEC/"
-        res_hec, model_names_hec = py_utils_general.load_all_dfs(folder_name, 'res')
-        st.write(model_names_hec)
+        folder_name = f"{folder}Best/"
+        res_best, model_names_best = py_utils_general.load_all_files(folder_name, 'res')
+        st.write(model_names_best)
 
         # Adjust the data type and ranges
-        for idx in range(0, len(res_hec)):
-            adjust_age_sex_cause(res_hec[idx].df_res, model_name=None, is_age_str=False)
-            adjust_age_sex_cause(res_hec[idx].df_true, model_name=None, is_age_str=False)
-            adjust_age_sex_cause(res_hec[idx].df_pred, model_name=None, is_age_str=False)            
+        for idx in range(0, len(res_best)):
+            adjust_age_sex_cause(res_best[idx].df_res, model_name=None, is_age_str=False)
+            adjust_age_sex_cause(res_best[idx].df_true, model_name=None, is_age_str=False)
+            adjust_age_sex_cause(res_best[idx].df_pred, model_name=None, is_age_str=False)            
 
         # Add them to the collections to be returned
-        deep_model_names = deep_model_names + model_names_hec
-        res = res + res_hec
+        deep_model_names = deep_model_names + model_names_best
+        res = res + res_best
 
-    # Model from DELL
-    if("Dell" in subfolders):
-        # Load the files
-        folder_name = f"{folder}Dell/"
-        res_dell, model_names_dell = py_utils_general.load_all_dfs(folder_name, 'res')
+    # # Model from HEC    
+    # if("HEC" in subfolders):
+    #     # Load the files
+    #     folder_name = f"{folder}HEC/"
+    #     res_hec, model_names_hec = py_utils_general.load_all_files(folder_name, 'res')
+    #     st.write(model_names_hec)
 
-        # Adjust the data type and ranges
-        for idx in range(0, len(res_dell)):
-            adjust_age_sex_cause(res_dell[idx].df_res, model_name=None, is_age_str=False)
-            adjust_age_sex_cause(res_dell[idx].df_true, model_name=None, is_age_str=False)
-            adjust_age_sex_cause(res_dell[idx].df_pred, model_name=None, is_age_str=False)
+    #     # Adjust the data type and ranges
+    #     for idx in range(0, len(res_hec)):
+    #         adjust_age_sex_cause(res_hec[idx].df_res, model_name=None, is_age_str=False)
+    #         adjust_age_sex_cause(res_hec[idx].df_true, model_name=None, is_age_str=False)
+    #         adjust_age_sex_cause(res_hec[idx].df_pred, model_name=None, is_age_str=False)            
+
+    #     # Add them to the collections to be returned
+    #     deep_model_names = deep_model_names + model_names_hec
+    #     res = res + res_hec
+
+    # # Model from DELL
+    # if("Dell" in subfolders):
+    #     # Load the files
+    #     folder_name = f"{folder}Dell/"
+    #     res_dell, model_names_dell = py_utils_general.load_all_files(folder_name, 'res')
+
+    #     # Adjust the data type and ranges
+    #     for idx in range(0, len(res_dell)):
+    #         adjust_age_sex_cause(res_dell[idx].df_res, model_name=None, is_age_str=False)
+    #         adjust_age_sex_cause(res_dell[idx].df_true, model_name=None, is_age_str=False)
+    #         adjust_age_sex_cause(res_dell[idx].df_pred, model_name=None, is_age_str=False)
         
-        # Add them to the collections to be returned
-        deep_model_names = deep_model_names + model_names_dell
-        res = res + res_dell
-    # Add models from HEC
-
-
+    #     # Add them to the collections to be returned
+    #     deep_model_names = deep_model_names + model_names_dell
+    #     res = res + res_dell
+    
+    
     dict_deep = {key:value for key, value in zip(deep_model_names, res)}
+    
+    # Minimize the memory consumption of the residuals
+    for key in dict_deep.keys():    
+        if 'country' in dict_deep[key].df_true.columns:
+            cols_drop = ['country']
+        else:
+            cols_drop = []
+        dict_deep[key].minimize_memory(cols_drop = cols_drop, cols_int = ['age', 'sex', 'cause', 'year'])
     return dict_deep, deep_model_names
 
 ##########################
@@ -249,6 +297,12 @@ sexes = [0, 1]
 causes = [0, 1, 2, 3, 4, 5]
 years = list(range(1959, 2018))
 ages = list(range(AGE_START, AGE_END))
+DEFAULT_MODELS = ['LC_SVD_00_99', 'APC_00_99', 'RH_00_99',
+                  'deep6_128_Lenovo_wonorm_00_99_emb0_ret1_fr1_add2', # 4 wins over cause, original freeze
+                  'deep6_128_Dell_00_99_emb0_ret0_fr1_add1', # only 1 win over cause, 11 wins over ages
+                  'deep6_128_Dell_bs2_00_99', # 4 wins over cause, 1 win over ages
+                  'deep6_128_HP_00_99_emb0_ret1_fr2_add2', # 3 wins over cause, 6 wins over cause
+                  'deep6_128_Lenovo_wonorm_bs2_00_99'] # best training error, 25 wins over ages, original hyperparam
 
 # Determine which columns contain the mortality rates and which columns contain categorical features
 # features_m = [f"m{age}" for age in range(AGE_START, AGE_END+1)]
@@ -272,6 +326,9 @@ res_deep, deep_model_names = load_res_deep(folder_deep)
 res = res_csm.copy()
 res.update(res_deep)
 
+print("CSM res size: ",asizeof.asizeof(res_csm)/1000000, " MB")
+print("Deep res size: ",asizeof.asizeof(res_deep)/1000000, " MB")
+
 model_names = csm_model_names + deep_model_names
 
 #####################
@@ -284,7 +341,7 @@ st.sidebar.markdown("# Control for Errors")
 # Select models for the errors
 models_err = st.sidebar.multiselect("Select models for the errors", 
                                     model_names,
-                                    [model_name for model_name in model_names if model_name.find("00_99") >= 0])
+                                    DEFAULT_MODELS)
 st.write(f"Selected models: {models_err}")
 cause = st.sidebar.selectbox("Select cause for larger comparison", options=list(py_params.BIDICT_CAUSE_1_HMD.values())[1:])
 cause_code = py_params.BIDICT_CAUSE_1_HMD.inverse[cause.lower()]

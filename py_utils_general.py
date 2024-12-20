@@ -523,7 +523,7 @@ def plot_age_mortality_model(df_long: pd.DataFrame,
         plt.savefig(f"{title_fig}.png")
     return fig, axs
 
-def load_all_dfs(folder, file_identifier):
+def load_all_files(folder, file_identifier):
     # Get the list of all fitted models in the folder
     files = os.listdir(folder)
     files = [file for file in files if file.find(file_identifier) >= 0]
@@ -536,32 +536,51 @@ def load_all_dfs(folder, file_identifier):
         with open(f"{folder}/{file}", "rb") as outfile:
             dfs.append(pickle.load(outfile))
 
-        # Shortened some of the hyperparameters
-        model_name = file
-        model_name = model_name[model_name.find('deep6')+6:]
+        # Shortened some of the hyperparameters        
+        # model_name = model_name[model_name.find('deep6')+6:]
+        model_name = file[:file.find(".pickle")]
+        model_name = model_name[model_name.find('deep6'):]
         model_name = model_name.replace('bootstrap', 'bs')
         model_name = model_name.replace('batch', 'b')
 
         # Determine whether it is lmxt or mxt    
-        input = ""
-        if model_name.find('lmxt') >= 0:
-            input = 'lmxt'
-        elif model_name.find('mxt') >= 0:
-            input = 'mxt'
+        # input = ""
+        # if model_name.find('lmxt') >= 0:
+        #     input = 'lmxt'
+        # elif model_name.find('mxt') >= 0:
+        #     input = 'mxt'
+
+        # post = ""
+        # if model_name.find("post") >= 0:
+        #     post = "_transfer"
+        # if model_name.find("float") >= 0:
+        #     post += "_float"
 
         # Get the age range
         ages = model_name[model_name.find('age') + 3:]
-        ages = ages[0:ages.find("_")]
-        if(len(ages) == 3):
+        idx_end = ages.find("_")
+        if(idx_end >= 0):
+            ages = ages[0:idx_end]
+        else:
+            ages = ages[0:]        
+        if(len(ages) == 3):            
             ages = f"00_{ages[1:]}"
         else:
             ages = f"{ages[:2]}_{ages[2:]}"
         
         # Shorten the age range
-        model_name = f"{input}_{model_name[0:model_name.find('age')]}{ages}"    
+        # model_name = f"{input}_{model_name[0:model_name.find('age')]}{ages}{post}"    
+        # model_name = f"{model_name[0:model_name.find('age')]}{ages}_{model_name[model_name.find('age')+7:]}"
+        model_name = f"{model_name[0:model_name.find('age')]}{ages}{model_name[model_name.find('age')+6:]}"
+        # if(model_name.find("bs") >= 0):
+        #     print(model_name)
+        # model_name = f"{model_name[0:model_name.find('age')]}{ages}"
+        # if(model_name.find("bs") >= 0):
+        #     print(ages)
+        #     print(model_name)   
         model_name = model_name.replace('epoch200_', "")
         
-        # Add model names to a list
+        # Add model names to a lists
         model_names.append(model_name)
 
     return [dfs, model_names]

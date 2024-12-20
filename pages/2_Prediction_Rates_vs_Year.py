@@ -23,10 +23,18 @@ MIN_YEAR_TRAIN = 1959
 MAX_YEAR_TRAIN = 1999
 MAX_YEAR_VALID = 1999
 MAX_YEAR_TEST = 2017
+# DEFAULT_MODELS = ['LC_SVD_00_99', 'APC_00_99', 'RH_00_99',
+#                   'lmxt_64_bs2_b64_00_99', 'lmxt_128_bs2_b64_00_99', 
+#                   'lmxt_64_bs0_b64_00_99', 'lmxt_128_bs0_b64_00_99', 
+#                   'lmxt_256_bs2_b256_00_99']
+# DEFAULT_MODELS = ['LC_SVD_00_99', 'APC_00_99', 'RH_00_99']
 DEFAULT_MODELS = ['LC_SVD_00_99', 'APC_00_99', 'RH_00_99',
-                  'lmxt_64_bs2_b64_00_99', 'lmxt_128_bs2_b64_00_99', 
-                  'lmxt_64_bs0_b64_00_99', 'lmxt_128_bs0_b64_00_99', 
-                  'lmxt_256_bs2_b256_00_99']
+                  'deep6_128_Lenovo_wonorm_00_99_emb0_ret1_fr1_add2', # 4 wins over cause, original freeze
+                  'deep6_128_Dell_00_99_emb0_ret0_fr1_add1', # only 1 win over cause, 11 wins over ages
+                  'deep6_128_Dell_bs2_00_99', # 4 wins over cause, 1 win over ages
+                  'deep6_128_HP_00_99_emb0_ret1_fr2_add2', # 3 wins over cause, 6 wins over cause
+                  'deep6_128_Lenovo_wonorm_bs2_00_99'] # best training error, 25 wins over ages, original hyperparam
+MAX_MODELS = 10
 countries = [py_params.BIDICT_COUNTRY_HMD['USA']]
 sexes = [0, 1]
 causes = [0, 1, 2, 3, 4, 5]
@@ -53,7 +61,7 @@ else:
     age = st.sidebar.slider("Select age", min_value=0, max_value=99, value=20)
 
     # Select models to be plotted
-    models = st.sidebar.multiselect("Select up to 6 models for the combined plots:", 
+    models = st.sidebar.multiselect(f"Select up to {MAX_MODELS} models for the combined plots:", 
                                     model_names,
                                     DEFAULT_MODELS)
 
@@ -74,8 +82,8 @@ else:
     #############################
     # Validate selection
     st.header("Plot Year vs Log-Rate", divider=True)
-    if len(models) > 8:
-        st.error(f"⚠️ You can only select up to 6 options.")
+    if len(models) > MAX_MODELS:
+        st.error(f"⚠️ You can only select up to {MAX_MODELS} options.")
     else:
         # Create figure title
         title = f"Year vs Log-Rate for "
@@ -124,6 +132,7 @@ else:
         sns.lineplot(data=df_filtered.loc[(df_filtered.sex == sex_code) & (df_filtered.cause==cause_code) & (df_filtered.age == age)], 
                     x='year', y='log_mortality', style='type', hue='type')
         plt.axvline(MAX_YEAR_TRAIN, color='gray', linestyle='--')
+        ax.legend(prop={'size': 6})
         st.subheader(f"Year vs Log-Rate for {sex} and {cause}")
         st.pyplot(fig)
 
@@ -131,6 +140,7 @@ else:
         fig.suptitle(f'Year vs Rate {sex}-{cause} ({age})')
         sns.lineplot(data=df_filtered.loc[(df_filtered.sex == sex_code) & (df_filtered.cause==cause_code) & (df_filtered.age == age)], 
                     x='year', y='mortality', style='type', hue='type')
+        ax.legend(prop={'size': 6})
         plt.axvline(MAX_YEAR_TRAIN, color='gray', linestyle='--')
         st.subheader(f"Year vs Rate for {sex} and {cause}")
         st.pyplot(fig)

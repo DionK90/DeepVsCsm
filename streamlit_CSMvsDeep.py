@@ -1,4 +1,4 @@
-
+import asizeof
 import pandas as pd
 import numpy as np
 
@@ -88,15 +88,21 @@ def load_data(folder):
 
 @st.cache_data
 def load_pred_csm(folder):        
-    csm_model_names = ['LC_SVD_00_99', 'LC_SVD_00_85', 'LC_SVD_20_99', 'LC_SVD_20_85',                       
-                       'APC_00_99', 'APC_00_85', 'APC_20_99', 'APC_20_85',
-                       'RH_00_99', 'RH_00_85', 'RH_20_99', 'RH_20_85',]
+    # csm_model_names = ['LC_SVD_00_99', 'LC_SVD_00_85', 'LC_SVD_20_99', 'LC_SVD_20_85',                       
+    #                    'APC_00_99', 'APC_00_85', 'APC_20_99', 'APC_20_85',
+    #                    'RH_00_99', 'RH_00_85', 'RH_20_99', 'RH_20_85',]
+    # csm_model_names = ['LC_SVD_00_99',
+    #                    'APC_00_99', 
+    #                    'RH_00_99']
+    csm_model_names = ['LC_SVD_00_99', 'LC_SVD_00_85', 'LC_SVD_20_85',
+                       'APC_00_99', 'APC_00_85', 'APC_20_85',
+                       'RH_00_99', 'RH_00_85', 'RH_20_85',]
 
     # Load the LC predictions for various age ranges
     with open(f"{folder}data_hmd_lc_svd_0_99.pickle", "rb") as outfile:
         hmd_pred_lc_svd_0_99 = pickle.load(outfile)
-    with open(f"{folder}data_hmd_lc_svd_20_99.pickle", "rb") as outfile:
-        hmd_pred_lc_svd_20_99 = pickle.load(outfile)
+    # with open(f"{folder}data_hmd_lc_svd_20_99.pickle", "rb") as outfile:
+    #     hmd_pred_lc_svd_20_99 = pickle.load(outfile)
     with open(f"{folder}data_hmd_lc_svd_0_85.pickle", "rb") as outfile:
         hmd_pred_lc_svd_0_85 = pickle.load(outfile)
     with open(f"{folder}data_hmd_lc_svd_20_85.pickle", "rb") as outfile:
@@ -105,8 +111,8 @@ def load_pred_csm(folder):
     # Load the APC predictions for various age ranges
     with open(f"{folder}data_hmd_apc_0_99.pickle", "rb") as outfile:
         hmd_pred_apc_0_99 = pickle.load(outfile)
-    with open(f"{folder}data_hmd_apc_20_99.pickle", "rb") as outfile:
-        hmd_pred_apc_20_99 = pickle.load(outfile)
+    # with open(f"{folder}data_hmd_apc_20_99.pickle", "rb") as outfile:
+    #     hmd_pred_apc_20_99 = pickle.load(outfile)
     with open(f"{folder}data_hmd_apc_0_85.pickle", "rb") as outfile:
         hmd_pred_apc_0_85 = pickle.load(outfile)
     with open(f"{folder}data_hmd_apc_20_85.pickle", "rb") as outfile:
@@ -115,8 +121,8 @@ def load_pred_csm(folder):
     # Load the RH predictions for various age ranges
     with open(f"{folder}data_hmd_rh_0_99.pickle", "rb") as outfile:
         hmd_pred_rh_0_99 = pickle.load(outfile)
-    with open(f"{folder}data_hmd_rh_20_99.pickle", "rb") as outfile:
-        hmd_pred_rh_20_99 = pickle.load(outfile)
+    # with open(f"{folder}data_hmd_rh_20_99.pickle", "rb") as outfile:
+    #     hmd_pred_rh_20_99 = pickle.load(outfile)
     with open(f"{folder}data_hmd_rh_0_85.pickle", "rb") as outfile:
         hmd_pred_rh_0_85 = pickle.load(outfile)
     with open(f"{folder}data_hmd_rh_20_85.pickle", "rb") as outfile:
@@ -124,38 +130,55 @@ def load_pred_csm(folder):
 
     # Extract the prediction dataframe for the LC_SVD models
     df_pred_lc_svd_0_99 = hmd_pred_lc_svd_0_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_lc_svd_0_99, csm_model_names[0])
+    adjust_age_sex_cause(df_pred_lc_svd_0_99, 'LC_SVD_00_99')
     df_pred_lc_svd_0_85 = hmd_pred_lc_svd_0_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_lc_svd_0_85, csm_model_names[1])
-    df_pred_lc_svd_20_99 = hmd_pred_lc_svd_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_lc_svd_20_99, csm_model_names[2])
+    adjust_age_sex_cause(df_pred_lc_svd_0_85, 'LC_SVD_00_85')
+    # df_pred_lc_svd_20_99 = hmd_pred_lc_svd_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
+    # adjust_age_sex_cause(df_pred_lc_svd_20_99, 'LC_SVD_20_99')
     df_pred_lc_svd_20_85 = hmd_pred_lc_svd_20_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_lc_svd_20_85, csm_model_names[3])
+    adjust_age_sex_cause(df_pred_lc_svd_20_85, 'LC_SVD_20_85')
 
     # Extract the prediction dataframe for the APC models
     df_pred_apc_0_99 = hmd_pred_apc_0_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_apc_0_99, csm_model_names[4])
+    adjust_age_sex_cause(df_pred_apc_0_99, 'APC_00_99')
     df_pred_apc_0_85 = hmd_pred_apc_0_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_apc_0_85, csm_model_names[5])
-    df_pred_apc_20_99 = hmd_pred_apc_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_apc_20_99, csm_model_names[6])
+    adjust_age_sex_cause(df_pred_apc_0_85, 'APC_00_85')
+    # df_pred_apc_20_99 = hmd_pred_apc_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
+    # adjust_age_sex_cause(df_pred_apc_20_99, 'APC_20_99')
     df_pred_apc_20_85 = hmd_pred_apc_20_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_apc_20_85, csm_model_names[7])
+    adjust_age_sex_cause(df_pred_apc_20_85, 'APC_20_85')
 
     # Extract the prediction dataframe for the RH models
     df_pred_rh_0_99 = hmd_pred_rh_0_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_rh_0_99, csm_model_names[8], is_cause_zero=False, is_sex_zero=False)
+    adjust_age_sex_cause(df_pred_rh_0_99, 'RH_00_99', is_cause_zero=False, is_sex_zero=False)    
     df_pred_rh_0_85 = hmd_pred_rh_0_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_rh_0_85, csm_model_names[9], is_cause_zero=False, is_sex_zero=False)
-    df_pred_rh_20_99 = hmd_pred_rh_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_rh_20_99, csm_model_names[10], is_cause_zero=False, is_sex_zero=False)
+    adjust_age_sex_cause(df_pred_rh_0_85, 'RH_00_85', is_cause_zero=False, is_sex_zero=False)
+    # df_pred_rh_20_99 = hmd_pred_rh_20_99.to_long(data_type=py_hmd_data.TYPE_DATA_M)
+    # adjust_age_sex_cause(df_pred_rh_20_99, 'RH_20_99', is_cause_zero=False, is_sex_zero=False)
     df_pred_rh_20_85 = hmd_pred_rh_20_85.to_long(data_type=py_hmd_data.TYPE_DATA_M)
-    adjust_age_sex_cause(df_pred_rh_20_85, csm_model_names[11], is_cause_zero=False, is_sex_zero=False)
-    
+    adjust_age_sex_cause(df_pred_rh_20_85, 'RH_20_85', is_cause_zero=False, is_sex_zero=False)
+        
+    # Make a dictionary of predictions df to be returned
+    # dict_csm = {key:value for key, value in zip(csm_model_names, 
+    #                                             [df_pred_lc_svd_0_99, df_pred_lc_svd_0_85, df_pred_lc_svd_20_99, df_pred_lc_svd_20_85,
+    #                                              df_pred_apc_0_99, df_pred_apc_0_85, df_pred_apc_20_99, df_pred_apc_20_85, 
+    #                                              df_pred_rh_0_99, df_pred_rh_0_85, df_pred_rh_20_99, df_pred_rh_20_85])}
+    # dict_csm = {key:value for key, value in zip(csm_model_names, 
+    #                                             [df_pred_lc_svd_0_99,
+    #                                              df_pred_apc_0_99,
+    #                                              df_pred_rh_0_99,])}
     dict_csm = {key:value for key, value in zip(csm_model_names, 
-                                                [df_pred_lc_svd_0_99, df_pred_lc_svd_0_85, df_pred_lc_svd_20_99, df_pred_lc_svd_20_85,
-                                                 df_pred_apc_0_99, df_pred_apc_0_85, df_pred_apc_20_99, df_pred_apc_20_85, 
-                                                 df_pred_rh_0_99, df_pred_rh_0_85, df_pred_rh_20_99, df_pred_rh_20_85])}
+                                                [df_pred_lc_svd_0_99, df_pred_lc_svd_0_85, df_pred_lc_svd_20_85,
+                                                 df_pred_apc_0_99, df_pred_apc_0_85, df_pred_apc_20_85, 
+                                                 df_pred_rh_0_99, df_pred_rh_0_85, df_pred_rh_20_85])}
+
+    # Minimize the memory consumption of each df
+    for key in dict_csm.keys():
+        if 'country' in dict_csm[key].columns:
+            cols_drop = ['country']
+        else:
+            cols_drop = []
+        dict_csm[key] = py_hmd_data.minimize_df(dict_csm[key], cols_drop=cols_drop, cols_int=['age', 'sex', 'cause', 'year'])
 
     return dict_csm, csm_model_names
 
@@ -183,36 +206,58 @@ def load_pred_deep(folder):
     # Get all immediate subfolders
     subfolders = [f.name for f in os.scandir(folder) if f.is_dir()]
 
-    # Model from HEC    
-    if("HEC" in subfolders):        
+    # Model from Best 
+    if("Best" in subfolders):        
         # Load the files
-        folder_name = f"{folder}HEC/"
+        folder_name = f"{folder}Best/"
 
-        dfs_hec, model_names_hec = py_utils_general.load_all_dfs(folder_name, 'df')
+        dfs_best, model_names_best = py_utils_general.load_all_files(folder_name, 'df')
 
         # Adjust the data type and ranges
-        for idx in range(0, len(dfs_hec)):
-            adjust_age_sex_cause(dfs_hec[idx], model_names_hec[idx], is_age_str=False)        
+        for idx in range(0, len(dfs_best)):
+            adjust_age_sex_cause(dfs_best[idx], model_names_best[idx], is_age_str=False)        
 
         # Add them to the collections to be returned
-        deep_model_names = deep_model_names + model_names_hec
-        dfs = dfs + dfs_hec
+        deep_model_names = deep_model_names + model_names_best
+        dfs = dfs + dfs_best
 
-    # Model from DELL
-    if("Dell" in subfolders):
-        # Load the files
-        folder_name = f"{folder}Dell/"
-        dfs_dell, model_names_dell = py_utils_general.load_all_dfs(folder_name, 'df')
+    # # Model from HEC
+    # if("HEC" in subfolders):        
+    #     # Load the files
+    #     folder_name = f"{folder}HEC/"
 
-        # Adjust the data type and ranges
-        for idx in range(0, len(dfs_dell)):
-            adjust_age_sex_cause(dfs_dell[idx], model_names_dell[idx], is_age_str=False)        
+    #     dfs_hec, model_names_hec = py_utils_general.load_all_files(folder_name, 'df')
+
+    #     # Adjust the data type and ranges
+    #     for idx in range(0, len(dfs_hec)):
+    #         adjust_age_sex_cause(dfs_hec[idx], model_names_hec[idx], is_age_str=False)        
+
+    #     # Add them to the collections to be returned
+    #     deep_model_names = deep_model_names + model_names_hec
+    #     dfs = dfs + dfs_hec
+
+    # # Model from DELL
+    # if("Dell" in subfolders):
+    #     # Load the files
+    #     folder_name = f"{folder}Dell/"
+    #     dfs_dell, model_names_dell = py_utils_general.load_all_files(folder_name, 'df')
+
+    #     # Adjust the data type and ranges
+    #     for idx in range(0, len(dfs_dell)):
+    #         adjust_age_sex_cause(dfs_dell[idx], model_names_dell[idx], is_age_str=False)        
         
-        # Add them to the collections to be returned
-        deep_model_names = deep_model_names + model_names_dell
-        dfs = dfs + dfs_dell
+    #     # Add them to the collections to be returned
+    #     deep_model_names = deep_model_names + model_names_dell
+    #     dfs = dfs + dfs_dell
     
     dict_deep = {key:value for key, value in zip(deep_model_names, dfs)}
+    # Minimize the memory consumption of each df
+    for key in dict_deep.keys():        
+        if 'country' in dict_deep[key].columns:
+            cols_drop = ['country']
+        else:
+            cols_drop = []
+        dict_deep[key] = py_hmd_data.minimize_df(dict_deep[key], cols_drop=cols_drop, cols_int=['age', 'sex', 'cause', 'year'])
 
     return dict_deep, deep_model_names
 
@@ -269,6 +314,9 @@ if 'df_all' not in st.session_state:
     dict_pred, csm_model_names =  load_pred_csm(folder_csm)
     dict_pred_deep, deep_model_names =  load_pred_deep(folder_deep)
     dict_pred.update(dict_pred_deep)
+
+    print("CSM df preds size: ",asizeof.asizeof(dict_pred)/1000000, " MB")
+    print("Deep df preds size: ",asizeof.asizeof(dict_pred_deep)/1000000, " MB")
 
     model_names = csm_model_names + deep_model_names
 

@@ -11,6 +11,9 @@ from typing import Type
 from typing import Callable
 import warnings
 
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.api import VAR
+
 import py_params
 
 TYPE_DATA_DEATH = 'death'
@@ -30,6 +33,25 @@ AVAIL_ERRORS = [TYPE_ERROR_MSE, TYPE_ERROR_MAE, TYPE_ERROR_MPE, TYPE_ERROR_MAPE,
 
 TYPE_RES_DF = 'df'
 TYPE_RES_NP = 'np'
+
+def minimize_df(df: pd.DataFrame,
+                cols_drop: list[str],
+                cols_int: list[str]):
+    """
+    Minimize the memory consumption of the given mortality df by converting dropping the specified columns, 
+    and try downsizing the integer columns.
+    Args:
+        df(pd.DataFrame):
+        cols_drop(list[str]): 
+        cols_int(list[int])
+    Returns:
+        The same dataframe with "minimal" memory consumption
+    """
+    df_returned = df.copy()
+    df_returned.drop(columns=cols_drop, inplace=True)
+    for col in cols_int:
+        df_returned[col] = pd.to_numeric(df_returned[col], downcast='integer')
+    return df_returned
 
 class HmdMortalityData():
     """
@@ -504,7 +526,7 @@ class HmdResidual():
         return df_returned
             
     def error(self, by:List[str], error_type:str = TYPE_ERROR_MSE, benchmark:pd.DataFrame=None,
-              year_val_end:int = None) -> pd.DataFrame:
+              year_val_end:int = None, df_true:pd.DataFrame=None) -> pd.DataFrame:
         """
         Get the mean errors, grouped by the given features (columns) in the `by` parameters.
         Supported type of errors can be seen in the AVAIL_ERRORS constant in this module.
@@ -518,9 +540,11 @@ class HmdResidual():
         avg_over_t(x) = sum_t(log(mxt))/T
 
         Args:
-            - by(List[str])
-            - error_type(str)
-            - benchmark(pd.DataFrame)
+            - by(List[str]): list of features (column names) on which mean errors will be calculated accordingly
+            - error_type(str): the type of errors (use constants provided in this class)
+            - benchmark(pd.DataFrame): a dataframe used as a benchmark to compare the error calculated (only used when type = R2)
+            - year_val_end(int): an optional information to split the error to train, validation, and test period
+            - df_true(pd.DataFrame): a dataframe containing the true value, used to compare the error calculated with the average value (the default benchmark when type = R2)
         Returns:
             A dataframe containing the error, grouped (averaged) according to the given `by` parameters.
         """        
@@ -630,7 +654,206 @@ class HmdResidual():
             plt.show()     
         else:
             ax.set_title(title, fontsize=10)
-           
+
+    def minimize_memory(self, cols_drop: list[str], cols_int:list[str]):
+        self.df_pred = None
+        self.df_true = minimize_df(self.df_true, cols_drop=cols_drop, cols_int=cols_int)
+        self.df_res = minimize_df(self.df_res, cols_drop=cols_drop, cols_int=cols_int) 
+
+class HmdResidualEff():
+    """
+    A class to calculate and store the residuals (differences) from a given true values and predicted values
+    of a HMD dataset. The main purpose of this class is to store the residuals, 
+    and provides some functions to convert the residuals into some performance measurements.
+    There is a also a function to draw the residual heatmap.
+    """
+    def __init__(self, df_true_long:pd.DataFrame, df_pred_long:pd.DataFrame, 
+                 data_type:str,                 
+                 year_train_end:int, year_val_end:int = None, 
+                 features_cat:List[str] = py_params.COL_CO_YR_SX_CA):
+        """
+        Residual is defined as true values - predicted values. This class will help in calculating errors between the true dataframe and a prediction dataframe.
+        The two columns must have the same columns, else only the columns in the true dataframe will be kept. Moreover, this function relies on sorting the two dataframe based on some categorical features, then subtract the mortality values between the two.
+        Therefore, categorical features that uniquely specify the two dataframes must be given (and ensured that these features exist in both dataframe)
+        Args:
+            df_true_long(pd.DataFrame): a dataframe with the same structure as HMD-COD mortality dataset containing the true values of mortality (or death or log mortality) in a long format
+            df_pred_long(pd.DataFrame): a dataframe with the same structure as HMD-COD mortality dataset containing the predicted values of mortality (or death or log mortality) in a long format
+            data_type(str): a string describing the data type contained (see available constants in this module, such as death, mortality, or log mortality) 
+            year_train_end (int)
+            year_val_end (int)
+            features_cat (List[str]): a list of columns' name used to uniquely identify mortality rates in the two dataframes. This features will be used to match the mortality rates between the two dataframes.
+        """
+        self.data_type = data_type        
+        self._col_res = f"{COL_RES}_{self.data_type}"
+
+        # Calculate the residuals (by sorting first, then applying a matrix operation)        
+        df_true = df_true.sort_values(by=features_cat)
+        df_pred = df_pred.sort_values(by=features_cat)
+        self.df_res = df_true.copy()        
+        self.df_res.loc[:,self._col_res] = df_true.loc[:,data_type].values - df_pred.loc[:,data_type].values
+        self.df_res.drop(columns=[data_type], inplace=True)
+
+        # Add info on which ones are train, valid (if specified) and test data
+        self.year_train_end = year_train_end
+        self.df_res['type'] = py_params.TYPE_TRAIN
+        if(year_val_end is not None):
+            self.df_res.loc[(self.df_res.year > year_train_end) & (self.df_res.year <= year_val_end), 'type'] = py_params.TYPE_VAL
+            self.df_res.loc[(self.df_res.year > year_val_end), 'type'] = py_params.TYPE_TEST
+        else:
+            self.df_res.loc[(self.df_res.year > year_train_end), 'type'] = py_params.TYPE_TEST
+
+        
+
+    def residual(self, operation:Callable=None):
+        """
+        Get the residual dataframe with an option to apply an operation to each residual. 
+        Args:
+            operation(callable): operation to be done to each residual, such as square or absolute. Give none to get the raw residual.
+        Returns:
+            A dataframe with HMD-COD variables in a long format containing the residuals.
+        """
+        df_returned = self.df_res.copy()
+
+        # If no operation is applied, return a copy of the residual dataframe
+        if operation is None:
+            return df_returned    
+        
+        # Apply the operation to all residuals
+        df_returned.loc[:, self._col_res] = operation(df_returned.loc[:, self._col_res])
+        return df_returned
+            
+    def error(self, by:List[str], error_type:str = TYPE_ERROR_MSE, 
+              df_true_long:pd.DataFrame = None,
+              benchmark:pd.DataFrame=None,
+              year_val_end:int = None) -> pd.DataFrame:
+        """
+        Get the mean errors, grouped by the given features (columns) in the `by` parameters.
+        Supported type of errors can be seen in the AVAIL_ERRORS constant in this module.
+
+        When error_type == TYPE_ERROR_R2, the 
+        Get the explanation ratio (Euthum et al., 2024) for the given true and predicted values
+        during the initialization.
+        1 - num / denum,
+        num = sum_x_t{ (log(mxt) - log(mxt_hat))^2 }
+        denum = sum_x_t{ (log(mxt) - avg_over_t(x))^2 }
+        avg_over_t(x) = sum_t(log(mxt))/T
+
+        Args:
+            - by(List[str])
+            - error_type(str)
+            - df_true
+            - benchmark(pd.DataFrame)
+        Returns:
+            A dataframe containing the error, grouped (averaged) according to the given `by` parameters.
+        """        
+        # Check the error_type        
+        if error_type not in AVAIL_ERRORS:
+            raise ValueError("Error type is not yet supported. See available constants in the module.")
+
+        # Check whether the "by" parameters match with the columns in the HMD dataset
+        if(by is not None):
+            if(not(set(by).issubset(self.df_res.columns))):
+                warnings.warn(f"Warning: The 'by' parameters must be from the columns of the HMD dataset: {self.df_res.columns}")
+            # Remove duplicates
+            by = list(set(by))
+            # Error when the number of samples after grouping is too small.        
+            num_samples = self.df_res.groupby(by=by).count().min().iloc[0]
+            if num_samples < 30:
+                raise ValueError(f"Too many categorical features, the number of samples per group ({num_samples}) may not be reliable.") 
+
+        # Calculate the errors for each sex and cause
+        df_returned = None
+        # Case for MSE
+        if(error_type == TYPE_ERROR_MSE):
+            df_returned = self.residual(np.square)
+        # Case for MAE
+        elif(error_type == TYPE_ERROR_MAE):
+            df_returned = self.residual(np.abs)
+        # Case for R2
+        elif(error_type == TYPE_ERROR_R2):
+            df_returned = self.residual(np.square)
+            
+            # If benchmark is None, then use average over years as benchmark predictions
+            if(benchmark is None):
+                # Averaging the true values based on country, sex, cause, and age
+                benchmark = df_true_long.copy()
+                benchmark = benchmark.groupby(by=['country','sex','cause','age'])[self.data_type].mean().reset_index()                
+                benchmark = pd.merge(df_true_long.drop(columns=[self.data_type]), benchmark, how="inner", on=["country", "sex", "cause", "age"])                
+            
+            # Sort the benchmark so that the log mortality with the stored true values 
+            benchmark.sort_values(by=py_params.COL_CO_YR_SX_CA, inplace=True)
+            
+            # Find the "variation" explained by the benchmark and by the model (the predictions in initialization)
+            # This is raw squared residuals for each country, sex, cause, and each age and year
+            denum = np.square(df_true_long[self.data_type].values - benchmark[self.data_type].values)
+            num = self.residual(np.square)[self._col_res].values
+
+            # Store it inside the dataframe to be returned
+            df_returned = self.residual()
+            df_returned.loc[:, "num"] = num
+            df_returned.loc[:, "denum"] = denum
+
+            # Calculate the "R2" and return.
+            # Needs different pattern because this measure is not simply averaging (like the other M**)
+            # R2 = 1 - sum(num)/sum(denum)
+            # if by is None:
+            #     return 1 - df_returned.loc[:, "num"].sum() / df_returned.loc[:, "denum"].sum()
+            # else:
+            #     df_returned = df_returned.groupby(by=by)[['num', 'denum']].sum().reset_index()
+            #     df_returned.loc[:, self._col_res] = 1 - df_returned.num.values/df_returned.denum.values                
+            #     df_returned.drop(columns=['num', 'denum'], inplace=True)
+            #     return df_returned                                        
+
+        # Case for MPE and MAPE 
+        else:        
+            df_returned = self.residual()
+            df_returned.loc[:, self._col_res] = df_returned.loc[:, self._col_res].values / self.df_true.loc[:, self.data_type].values            
+            # special case for MAPE, which is MPE with absolute
+            if(error_type == TYPE_ERROR_MAPE):
+                df_returned.loc[:, self._col_res] = np.abs(df_returned.loc[:, self._col_res].values)                   
+        
+        # Separate validation and test set if necessary
+        if(year_val_end is not None):        
+            df_returned.loc[(df_returned.year > self.year_train_end) & (df_returned.year <= year_val_end), 'type'] = py_params.TYPE_VAL
+        else:
+            df_returned.loc[(df_returned.year > self.year_train_end), 'type'] = py_params.TYPE_TEST
+
+        # Check if "by" is None (calculate the mean error of the dataframe)
+        if(by is None):
+            if(error_type == TYPE_ERROR_R2):
+                return 1 - df_returned.loc[:, "num"].sum() / df_returned.loc[:, "denum"].sum()
+            else:
+                return df_returned.loc[:, self._col_res].mean()               
+
+        # group by the squared residuals according to the "by" parameter, and calculate the average for each group
+        if(error_type == TYPE_ERROR_R2):
+            df_returned = df_returned.groupby(by=by)[['num', 'denum']].sum().reset_index()            
+            df_returned.loc[:, self._col_res] = 1 - df_returned.num.values/df_returned.denum.values                            
+            df_returned.drop(columns=['num', 'denum'], inplace=True)
+            return df_returned
+            
+        
+        return df_returned.groupby(by=by)[self._col_res].mean().reset_index()
+
+    def heatmap(self, sex, cause, ax = None, title=None, cmap=None):   
+        
+
+        # Generate some example data
+        data = np.random.randn(10, 10)  # Random data between -3 and 3
+
+        if(cmap is None):
+            cmap="RdYlBu"
+        sns.heatmap(data = self.df_res.loc[(self.df_res.sex == sex) & (self.df_res.cause==cause), ['year', 'age', self._col_res]].pivot(index='age', values=self._col_res, columns='year'),
+                    cmap=cmap, ax=ax, center=0)
+        if (title is None):
+            title = f"Residual {py_params.BIDICT_SEX_1_2[sex]}-{py_params.BIDICT_CAUSE_1_HMD[cause]}"
+        if(ax is None):
+            plt.title(title,fontsize=10)
+            plt.show()     
+        else:
+            ax.set_title(title, fontsize=10)
+
+
 class HmdError():
     """
     A class to store mean errors from forecasts on HMD dataset using various models.
@@ -834,6 +1057,12 @@ def compare_test_error(residuals:list[HmdResidual],
     ls_mean = [df_mse[f"{col_res}_{name}"].mean() for name in model_names]
     ls_median = [df_mse[f"{col_res}_{name}"].median() for name in model_names]
     dict_best = df_mse['best'].value_counts().to_dict()
+
+    # Add entry if there are models who never win
+    for model_name in [name for name in model_names if not name in dict_best.keys()]:
+        dict_best[model_name] = 0
+
+    # Make a list
     ls_best = [dict_best[key] for key in model_names]
     
     df_mse_sum = pd.DataFrame({'model': model_names, 'mean MSE': ls_mean,
